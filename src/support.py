@@ -27,3 +27,20 @@ def get_character_info(personaje):
     return f"{personaje} has appeared in {episode_percentage}% of episodes, {scene_percentage}% of scenes, and has an average of {average_lines} lines per episode 🍌"
 
 
+def proportion_lines(personaje):
+    character = lines.loc[lines["first_name"] == f"{personaje}"]
+    character = character.groupby("season").size().reset_index(name='count')
+    total_season = lines.groupby("season").size().reset_index(name='count')
+    merged_df = pd.merge(total_season, character, on='season', how='left').fillna(0)
+    merged_df = merged_df.astype({"count_y": int})
+    merged_df["percentage"] = (merged_df["count_y"] / merged_df["count_x"]) * 100
+    merged_df = merged_df.astype({"percentage": int})
+
+    sns.lineplot(data=merged_df, x="season", y="percentage", label=f"{personaje}", color='red', legend=False)
+    plt.yticks(np.arange(0, 110, 10), ['{}%'.format(i) for i in np.arange(0, 110, 10)])
+    plt.xlabel('Season')
+    plt.ylabel('Proportion of lines spoken')
+    plt.title(f"Proportion of lines spoken by {personaje} per season")
+    return plt.show()
+
+
